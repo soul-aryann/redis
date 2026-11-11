@@ -30,7 +30,19 @@ public class CommandHandler {
         if (command.size() < 3) {
             return ResponseHandler.error("wrong number of arguments for 'set' command");
         }
-        KeyValueStore.set(command.get(1), command.get(2));
+        Long expiryMillis = null;
+        for (int index = 3; index < command.size(); index++) {
+            String option = command.get(index).toUpperCase(Locale.ROOT);
+            if (!"PX".equals(option) || index + 1 >= command.size()) {
+                return ResponseHandler.error("syntax error");
+            }
+            try {
+                expiryMillis = Long.parseLong(command.get(++index));
+            } catch (NumberFormatException exception) {
+                return ResponseHandler.error("value is not an integer or out of range");
+            }
+        }
+        KeyValueStore.set(command.get(1), command.get(2), expiryMillis);
         return ResponseHandler.simpleString("OK");
     }
 
