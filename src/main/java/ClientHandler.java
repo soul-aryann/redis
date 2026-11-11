@@ -13,7 +13,7 @@ public class ClientHandler {
             OutputStream output = clientSocket.getOutputStream();
             List<String> command;
             while ((command = parser.readCommand()) != null) {
-                output.write(ResponseHandler.response(command));
+                output.write(CommandHandler.handle(command));
                 output.flush();
             }
         } catch (IOException e) {
