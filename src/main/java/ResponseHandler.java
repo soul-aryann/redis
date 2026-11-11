@@ -2,7 +2,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class ResponseHandler {
-    private ResponseHandler() {}
+    private ResponseHandler() {
+    }
 
     public static byte[] response(List<String> command) {
         if (command.isEmpty()) {
