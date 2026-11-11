@@ -37,7 +37,7 @@ public class RespParser {
         if(value.length != length){
             throw new IOException("Unexpected end of Bulk Stream");
         }
-        expectCRLF();
+        expectCrLf();
         return new String(value,StandardCharsets.UTF_8);
     }
     private int readInteger() throws IOException {
