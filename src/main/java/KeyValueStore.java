@@ -1,7 +1,10 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class KeyValueStore {
     private static final ConcurrentHashMap<String, Entry> VALUES = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, List<String>> LISTS = new ConcurrentHashMap<>();
 
     private KeyValueStore() {
     }
@@ -22,6 +25,17 @@ public class KeyValueStore {
         }
         return entry.value();
     }
+    public static int rpush(String key, List<String> elements) {
+        return LISTS.compute(key, (k, list) -> {
+            if (list == null) {
+                list = new ArrayList<>();
+            }
+
+            list.addAll(elements);
+            return list;
+        }).size();
+    }
+
 
     private record Entry(String value, long expiresAtMillis) {
         private boolean expired() {

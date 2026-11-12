@@ -56,4 +56,17 @@ public class CommandHandler {
         }
         return ResponseHandler.bulkString(value);
     }
+
+    private static byte[] rpush(List<String> command) {
+        if (command.size() < 3) {
+            return ResponseHandler.error("wrong number of arguments for 'rpush' command");
+        }
+
+        String key = command.get(1);
+        List<String> elements = command.subList(2, command.size());
+
+        int size = KeyValueStore.rpush(key, elements);
+
+        return ResponseHandler.integer(size);
+    }
 }

@@ -25,4 +25,7 @@ public class ResponseHandler {
     public static byte[] error(String message) {
         return ("-ERR " + message + "\r\n").getBytes(StandardCharsets.UTF_8);
     }
+    public static byte[] integer(int value) {
+        return (":" + value + "\r\n").getBytes(StandardCharsets.UTF_8);
+    }
 }
