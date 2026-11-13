@@ -37,7 +37,7 @@ public class CommandHandler {
                 return ResponseHandler.error("syntax error");
             }
             try {
-                expiryMillis = Long.parseLong(command.get(++index));
+                expiryMillis = Long.valueOf(command.get(++index));
             } catch (NumberFormatException exception) {
                 return ResponseHandler.error("value is not an integer or out of range");
             }
