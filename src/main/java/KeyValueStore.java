@@ -1,7 +1,7 @@
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class KeyValueStore {
     private static final ConcurrentHashMap<String, Entry> VALUES = new ConcurrentHashMap<>();
@@ -86,5 +86,17 @@ public class KeyValueStore {
             return 0;
         }
         return list.size();
+    }
+    public static String lpop(String key) {
+    AtomicReference<String> popped = new AtomicReference<>();
+        LISTS.computeIfPresent(key, (k, list) -> {
+            if (list.isEmpty()) {
+                return null;
+            }
+            popped.set(list.remove(0));
+
+            return list.isEmpty() ? null : list;
+        });
+        return popped.get();
     }
 }

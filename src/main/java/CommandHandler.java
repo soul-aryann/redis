@@ -45,6 +45,15 @@ public class CommandHandler {
                     KeyValueStore.llen(command.get(1))
                 );
             }
+            case "LPOP" -> {
+                if (command.size() != 2) {
+                    yield ResponseHandler.error(
+                        "wrong number of arguments for 'lpop' command"
+                    );
+                }
+
+                yield lpop(command);
+            }
             default -> ResponseHandler.error(
                 "unknown command '" + command.get(0) + "'"
             );
@@ -135,5 +144,15 @@ public class CommandHandler {
         List<String> elements = command.subList(2, command.size());
 
         return KeyValueStore.lpush(key, elements);
+    }
+    
+    private static byte[] lpop(List<String> command) {
+        String value = KeyValueStore.lpop(command.get(1));
+
+        if (value == null) {
+            return ResponseHandler.nullBulkString();
+        }
+
+        return ResponseHandler.bulkString(value);
     }
 }
