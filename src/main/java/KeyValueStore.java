@@ -79,4 +79,12 @@ public class KeyValueStore {
         stop = Math.min(stop, size - 1);
         return new ArrayList<>(list.subList(start, stop + 1));
     }
+    public static int llen(String key) {
+        List<String> list = LISTS.get(key);
+
+        if (list == null) {
+            return 0;
+        }
+        return list.size();
+    }
 }

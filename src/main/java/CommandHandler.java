@@ -34,6 +34,17 @@ public class CommandHandler {
 
                 yield ResponseHandler.integer(lpush(command));
             }
+            case "LLEN" -> {
+                if (command.size() != 2) {
+                    yield ResponseHandler.error(
+                        "wrong number of arguments for 'llen' command"
+                    );
+                }
+
+                yield ResponseHandler.integer(
+                    KeyValueStore.llen(command.get(1))
+                );
+            }
             default -> ResponseHandler.error(
                 "unknown command '" + command.get(0) + "'"
             );
