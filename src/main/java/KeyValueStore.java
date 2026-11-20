@@ -42,6 +42,16 @@ public class KeyValueStore {
             return list;
         }).size();
     }
+    public static int lpush(String key, List<String> elements) {
+        return LISTS.compute(key, (k, list) -> {
+            if (list == null) {
+                list = new ArrayList<>();
+            }
+
+            list.addAll(0, elements);
+            return list;
+        }).size();
+    }
 
     private record Entry(String value, long expiresAtMillis) {
         private boolean expired() {

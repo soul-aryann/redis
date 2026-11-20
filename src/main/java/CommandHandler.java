@@ -25,6 +25,15 @@ public class CommandHandler {
                 }
                 yield ResponseHandler.integer(rpush(command));
             }
+            case "LPUSH" -> {
+                if (command.size() < 3) {
+                    yield ResponseHandler.error(
+                        "wrong number of arguments for 'lpush' command"
+                    );
+                }
+
+                yield ResponseHandler.integer(lpush(command));
+            }
             default -> ResponseHandler.error(
                 "unknown command '" + command.get(0) + "'"
             );
@@ -109,5 +118,11 @@ public class CommandHandler {
             command.get(1), start, stop
         );
         return ResponseHandler.array(result);
+    }
+    private static int lpush(List<String> command) {
+        String key = command.get(1);
+        List<String> elements = command.subList(2, command.size());
+
+        return KeyValueStore.lpush(key, elements);
     }
 }
