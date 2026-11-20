@@ -51,14 +51,21 @@ public class KeyValueStore {
     }
 
     public static List<String> lrange(String key, int start, int stop) {
-    List<String> list = LISTS.get(key);
-
-    if (list == null || start >= list.size() || start > stop) {
+        List<String> list = LISTS.get(key);
+        if (list == null || list.isEmpty()) {
             return List.of();
         }
-
-        int end = Math.min(stop, list.size() - 1);
-
-        return new ArrayList<>(list.subList(start, end + 1));
+        int size = list.size();
+        if (start < 0) {
+            start = Math.max(0, size + start);
+        }
+        if (stop < 0) {
+            stop = Math.max(0, size + stop);
+        }
+        if (start >= size || start > stop) {
+            return List.of();
+        }
+        stop = Math.min(stop, size - 1);
+        return new ArrayList<>(list.subList(start, stop + 1));
     }
 }
