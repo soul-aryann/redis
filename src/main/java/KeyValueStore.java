@@ -47,9 +47,10 @@ public class KeyValueStore {
             if (list == null) {
                 list = new ArrayList<>();
             }
-
-            list.addAll(0, elements);
-            return list;
+             for (String element : elements) {
+                    list.add(0, element);
+                }
+                return list;
         }).size();
     }
 
