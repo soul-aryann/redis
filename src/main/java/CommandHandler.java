@@ -16,6 +16,7 @@ public class CommandHandler {
             case "ECHO" -> echo(command);
             case "SET" -> set(command);
             case "GET" -> get(command);
+            case "LRANGE" -> lrange(command);
             case "RPUSH" -> {
                 if (command.size() < 3) {
                     yield ResponseHandler.error(
@@ -87,5 +88,26 @@ public class CommandHandler {
         String key = command.get(1);
         List<String> elements = command.subList(2, command.size());
         return KeyValueStore.rpush(key, elements);
+    }
+    private static byte[] lrange(List<String> command) {
+        if (command.size() != 4) {
+            return ResponseHandler.error(
+                "wrong number of arguments for 'lrange' command"
+            );
+        }
+        int start;
+        int stop;
+        try {
+            start = Integer.parseInt(command.get(2));
+            stop = Integer.parseInt(command.get(3));
+        } catch (NumberFormatException exception) {
+            return ResponseHandler.error(
+                "value is not an integer or out of range"
+            );
+        }
+        List<String> result = KeyValueStore.lrange(
+            command.get(1), start, stop
+        );
+        return ResponseHandler.array(result);
     }
 }

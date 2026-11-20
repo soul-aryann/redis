@@ -49,4 +49,16 @@ public class KeyValueStore {
                 System.currentTimeMillis() >= expiresAtMillis;
         }
     }
+
+    public static List<String> lrange(String key, int start, int stop) {
+    List<String> list = LISTS.get(key);
+
+    if (list == null || start >= list.size() || start > stop) {
+            return List.of();
+        }
+
+        int end = Math.min(stop, list.size() - 1);
+
+        return new ArrayList<>(list.subList(start, end + 1));
+    }
 }
