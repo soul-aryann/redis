@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.TimeoutException;
 
 public class Main {
   public static void main(String[] args){
@@ -15,7 +16,13 @@ public class Main {
           serverSocket.setReuseAddress(true);
           while (true) {
             Socket clientSocket = serverSocket.accept();
-            new Thread(() -> ClientHandler.handleClient(clientSocket)).start();
+            new Thread(() -> {
+                try {
+                    ClientHandler.handleClient(clientSocket);
+                } catch (TimeoutException ex) {
+                    System.getLogger(Main.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                }
+            }).start();
           }
         } catch (IOException e) {
           System.out.println("IOException: " + e.getMessage());

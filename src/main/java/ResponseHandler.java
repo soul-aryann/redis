@@ -39,4 +39,7 @@ public class ResponseHandler {
         }
         return output.toByteArray();
     }
+    public static byte[] nullArray() {
+        return "*-1\r\n".getBytes(StandardCharsets.UTF_8);
+    }
 }

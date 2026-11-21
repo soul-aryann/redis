@@ -1,6 +1,11 @@
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.StructuredTaskScope.TimeoutException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class KeyValueStore {
@@ -8,6 +13,12 @@ public class KeyValueStore {
 
     private static final ConcurrentHashMap<String, List<String>> LISTS =
         new ConcurrentHashMap<>();
+
+    private static final ConcurrentHashMap<String, Object> LOCKS =
+    new ConcurrentHashMap<>();
+
+    private static final ConcurrentHashMap<String, Deque<CompletableFuture<String>>> WAITERS =
+        new ConcurrentHashMap<>();  
 
     private KeyValueStore() {}
 
@@ -33,14 +44,36 @@ public class KeyValueStore {
     }
 
     public static int rpush(String key, List<String> elements) {
-        return LISTS.compute(key, (k, list) -> {
-            if (list == null) {
-                list = new ArrayList<>();
+        Object lock = LOCKS.computeIfAbsent(key, k -> new Object());
+
+        synchronized (lock) {
+            List<String> list = LISTS.computeIfAbsent(
+                key, k -> new ArrayList<>()
+            );
+
+            for (String element : elements) {
+                Deque<CompletableFuture<String>> queue = WAITERS.get(key);
+
+                if (queue != null && !queue.isEmpty()) {
+                    CompletableFuture<String> waiter = queue.pollFirst();
+
+                    waiter.complete(element);
+                } else {
+                    list.add(element);
+                }
+
+                if (queue != null && queue.isEmpty()) {
+                    WAITERS.remove(key, queue);
+                }
             }
 
-            list.addAll(elements);
-            return list;
-        }).size();
+            if (list.isEmpty()) {
+                LISTS.remove(key);
+                return 0;
+            }
+
+            return list.size();
+        }
     }
     public static int lpush(String key, List<String> elements) {
         return LISTS.compute(key, (k, list) -> {
@@ -103,5 +136,64 @@ public class KeyValueStore {
         });
 
         return popped.get();
+    }
+    public static List<String> blpop(String key, double timeoutSeconds) throws java.util.concurrent.TimeoutException {
+        Object lock = LOCKS.computeIfAbsent(key, k -> new Object());
+        CompletableFuture<String> waiter = new CompletableFuture<>();
+
+        synchronized (lock) {
+            List<String> list = LISTS.get(key);
+
+            if (list != null && !list.isEmpty()) {
+                String value = list.remove(0);
+
+                if (list.isEmpty()) {
+                    LISTS.remove(key);
+                }
+
+                return List.of(key, value);
+            }
+
+            WAITERS.computeIfAbsent(key, k -> new ArrayDeque<>())
+                .addLast(waiter);
+        }
+
+        try {
+            String value;
+
+            if (timeoutSeconds == 0) {
+                value = waiter.get();
+            } else {
+                value = waiter.get(
+                    (long)(timeoutSeconds * 1000),
+                    TimeUnit.MILLISECONDS
+                );
+            }
+
+            return List.of(key, value);
+
+        } catch (TimeoutException exception) {
+            return null;
+
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            return null;
+
+        } catch (java.util.concurrent.ExecutionException exception) {
+            throw new RuntimeException(exception);
+
+        } finally {
+            synchronized (lock) {
+                Deque<CompletableFuture<String>> queue = WAITERS.get(key);
+
+                if (queue != null) {
+                    queue.remove(waiter);
+
+                    if (queue.isEmpty()) {
+                        WAITERS.remove(key, queue);
+                    }
+                }
+            }
+        }
     }
 }
