@@ -46,7 +46,7 @@ public class CommandHandler {
                 );
             }
             case "LPOP" -> {
-                if (command.size() != 2) {
+                if (command.size() < 2 || command.size() > 3) {
                     yield ResponseHandler.error(
                         "wrong number of arguments for 'lpop' command"
                     );
@@ -145,14 +145,27 @@ public class CommandHandler {
 
         return KeyValueStore.lpush(key, elements);
     }
-    
+
     private static byte[] lpop(List<String> command) {
-        String value = KeyValueStore.lpop(command.get(1));
-
-        if (value == null) {
-            return ResponseHandler.nullBulkString();
+        String key = command.get(1);
+        if (command.size() == 2) {
+            List<String> values = KeyValueStore.lpop(key, 1);
+            if (values.isEmpty()) {
+                return ResponseHandler.nullBulkString();
+            }
+            return ResponseHandler.bulkString(values.get(0));
         }
-
-        return ResponseHandler.bulkString(value);
+        try {
+            int count = Integer.parseInt(command.get(2));
+            if (count < 0) {
+                return ResponseHandler.error("value is out of range");
+            }
+            List<String> values = KeyValueStore.lpop(key, count);
+            return ResponseHandler.array(values);
+        } catch (NumberFormatException exception) {
+            return ResponseHandler.error(
+                "value is not an integer or out of range"
+            );
+        }
     }
 }

@@ -87,16 +87,21 @@ public class KeyValueStore {
         }
         return list.size();
     }
-    public static String lpop(String key) {
-    AtomicReference<String> popped = new AtomicReference<>();
+    public static List<String> lpop(String key, int count) {
+        AtomicReference<List<String>> popped = new AtomicReference<>(List.of());
         LISTS.computeIfPresent(key, (k, list) -> {
-            if (list.isEmpty()) {
-                return null;
-            }
-            popped.set(list.remove(0));
+            int elementsToRemove = Math.min(count, list.size());
+            List<String> removed = new ArrayList<>(
+                list.subList(0, elementsToRemove)
+            );
+
+            popped.set(removed);
+
+            list.subList(0, elementsToRemove).clear();
 
             return list.isEmpty() ? null : list;
         });
+
         return popped.get();
     }
 }
