@@ -1,13 +1,12 @@
 
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.TimeoutException;
 
 public class CommandHandler {
 
     private CommandHandler() {}
 
-    public static byte[] handle(List<String> command) throws TimeoutException {
+    public static byte[] handle(List<String> command){
         if (command.isEmpty()) {
             return ResponseHandler.error("empty command");
         }
@@ -170,32 +169,30 @@ public class CommandHandler {
             );
         }
     }
-    private static byte[] blpop(List<String> command) throws TimeoutException {
+    
+    private static byte[] blpop(List<String> command) {
         if (command.size() != 3) {
             return ResponseHandler.error(
                 "wrong number of arguments for 'blpop' command"
             );
         }
-
         String key = command.get(1);
-
         try {
             double timeout = Double.parseDouble(command.get(2));
 
             if (!Double.isFinite(timeout) || timeout < 0) {
                 return ResponseHandler.error("timeout is out of range");
             }
-
             List<String> result = KeyValueStore.blpop(key, timeout);
-
             if (result == null) {
                 return ResponseHandler.nullArray();
             }
-
             return ResponseHandler.array(result);
-
         } catch (NumberFormatException exception) {
-            return ResponseHandler.error("timeout is not a float or out of range");
+            return ResponseHandler.error(
+                "timeout is not a float or out of range"
+            );
         }
     }
+
 }
