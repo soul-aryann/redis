@@ -54,6 +54,12 @@ public class KeyValueStore {
         Object lock = getLock(key);
 
         synchronized (lock) {
+            List<String> list = LISTS.computeIfAbsent(
+                key, k -> new ArrayList<>()
+            );
+
+            int resultingLength = list.size() + elements.size();
+
             for (String element : elements) {
                 Deque<CompletableFuture<String>> queue = WAITERS.get(key);
 
@@ -73,14 +79,15 @@ public class KeyValueStore {
                 }
 
                 if (!delivered) {
-                    LISTS.computeIfAbsent(
-                        key, k -> new ArrayList<>()
-                    ).add(element);
+                    list.add(element);
                 }
             }
 
-            List<String> list = LISTS.get(key);
-            return list == null ? 0 : list.size();
+            if (list.isEmpty()) {
+                LISTS.remove(key, list);
+            }
+
+            return resultingLength;
         }
     }
 
