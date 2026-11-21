@@ -95,7 +95,7 @@ public class KeyValueStore {
         Object lock = getLock(key);
 
         synchronized (lock) {
-            for (int i = elements.size() - 1; i >= 0; i--) {
+            for (int i = 0; i < elements.size(); i++) {
                 String element = elements.get(i);
 
                 Deque<CompletableFuture<String>> queue = WAITERS.get(key);
