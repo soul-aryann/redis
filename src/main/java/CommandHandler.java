@@ -6,6 +6,10 @@ public class CommandHandler {
 
     private CommandHandler() {}
     private static volatile String role = "master";
+    private static final String MASTER_REPLID =
+    "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb";
+
+    private static final long MASTER_REPL_OFFSET = 0;
     public static void setRole(String serverRole) {
     role = serverRole;
 }
@@ -65,11 +69,12 @@ public class CommandHandler {
                         "wrong number of arguments for 'info' command"
                     );
                 }
-                if (!command.get(1).equalsIgnoreCase("replication")) {
-                    yield ResponseHandler.error("unsupported info section");
-                }
+                String response =
+                "role:" + role + "\r\n" +
+                "master_replid:" + MASTER_REPLID + "\r\n" +
+                "master_repl_offset:" + MASTER_REPL_OFFSET;
 
-                yield ResponseHandler.bulkString("role:" + role);
+            yield ResponseHandler.bulkString(response);
             }
             default -> ResponseHandler.error(
                 "unknown command '" + command.get(0) + "'"
