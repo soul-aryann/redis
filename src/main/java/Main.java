@@ -33,6 +33,9 @@ public class Main {
                 masterPort = Integer.parseInt(masterAddress[1]);
             }
         }
+        CommandHandler.setRole(
+            masterHost == null ? "master" : "slave"
+        );
         try {
             if (masterHost != null) {
                 ReplicationManager.connectToMaster(
