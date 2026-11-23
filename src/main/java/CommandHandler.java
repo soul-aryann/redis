@@ -55,6 +55,19 @@ public class CommandHandler {
                 yield lpop(command);
             }
             case "BLPOP" -> blpop(command);
+            
+            case "INFO" -> {
+                if (command.size() != 2) {
+                    yield ResponseHandler.error(
+                        "wrong number of arguments for 'info' command"
+                    );
+                }
+                if (!command.get(1).equalsIgnoreCase("replication")) {
+                    yield ResponseHandler.error("unsupported info section");
+                }
+
+                yield ResponseHandler.bulkString("role:master");
+            }
             default -> ResponseHandler.error(
                 "unknown command '" + command.get(0) + "'"
             );
