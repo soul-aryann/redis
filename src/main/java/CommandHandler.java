@@ -5,7 +5,10 @@ import java.util.Locale;
 public class CommandHandler {
 
     private CommandHandler() {}
-
+    private static volatile String role = "master";
+    public static void setRole(String serverRole) {
+    role = serverRole;
+}
     public static byte[] handle(List<String> command){
         if (command.isEmpty()) {
             return ResponseHandler.error("empty command");
@@ -66,7 +69,7 @@ public class CommandHandler {
                     yield ResponseHandler.error("unsupported info section");
                 }
 
-                yield ResponseHandler.bulkString("role:master");
+                yield ResponseHandler.bulkString("role:" + role);
             }
             default -> ResponseHandler.error(
                 "unknown command '" + command.get(0) + "'"
