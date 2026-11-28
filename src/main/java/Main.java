@@ -40,7 +40,8 @@ public class Main {
             if (masterHost != null) {
                 ReplicationManager.connectToMaster(
                     masterHost,
-                    masterPort
+                    masterPort,
+                    port
                 );
             }
             try (ServerSocket serverSocket = new ServerSocket(port)) {
