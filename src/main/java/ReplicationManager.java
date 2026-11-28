@@ -33,10 +33,6 @@ public class ReplicationManager {
         String psyncResponse = readResponse(input);
         System.out.println("PSYNC response: " + psyncResponse);
 
-        String capaCommand =
-                "*3\r\n$8\r\nREPLCONF\r\n$4\r\ncapa\r\n$6\r\npsync2\r\n";
-
-        sendCommand(output, capaCommand);
         readResponse(input);
     }
 
